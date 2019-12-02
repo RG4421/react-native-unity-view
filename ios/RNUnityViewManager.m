@@ -14,18 +14,11 @@
 @synthesize bridge = _bridge;
 
 RCT_EXPORT_MODULE(UnityView)
+RCT_EXPORT_VIEW_PROPERTY(onMessage, RCTDirectEventBlock)
 
 - (UIView *)view
 {
-    self.currentView = [[RNUnityView alloc] init];
-    if ([UnityUtils isUnityReady]) {
-        [self.currentView setUnityView: [GetAppController() unityView]];
-    } else {
-        [UnityUtils createPlayer:^{
-            [self.currentView setUnityView: [GetAppController() unityView]];
-        }];
-    }
-    return self.currentView;
+    return [[RNUnityView alloc] init];
 }
 
 - (dispatch_queue_t)methodQueue
@@ -38,8 +31,55 @@ RCT_EXPORT_MODULE(UnityView)
     return YES;
 }
 
++ (void)listenAppState
+{
+    for (NSString *name in @[UIApplicationDidBecomeActiveNotification,
+                             UIApplicationDidEnterBackgroundNotification,
+                             UIApplicationWillTerminateNotification,
+                             UIApplicationWillResignActiveNotification,
+                             UIApplicationWillEnterForegroundNotification,
+                             UIApplicationDidReceiveMemoryWarningNotification]) {
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(handleAppStateDidChange:)
+                                                     name:name
+                                                   object:nil];
+    }
+}
+
++ (void)handleAppStateDidChange:(NSNotification *)notification
+{
+    UnityAppController* unityAppController = GetAppController();
+    
+    UIApplication* application = [UIApplication sharedApplication];
+    
+    if ([notification.name isEqualToString:UIApplicationWillResignActiveNotification]) {
+        [unityAppController applicationWillResignActive:application];
+    } else if ([notification.name isEqualToString:UIApplicationDidEnterBackgroundNotification]) {
+        [unityAppController applicationDidEnterBackground:application];
+    } else if ([notification.name isEqualToString:UIApplicationWillEnterForegroundNotification]) {
+        [unityAppController applicationWillEnterForeground:application];
+    } else if ([notification.name isEqualToString:UIApplicationDidBecomeActiveNotification]) {
+        [unityAppController applicationDidBecomeActive:application];
+    } else if ([notification.name isEqualToString:UIApplicationWillTerminateNotification]) {
+        [unityAppController applicationWillTerminate:application];
+    } else if ([notification.name isEqualToString:UIApplicationDidReceiveMemoryWarningNotification]) {
+		[unityAppController applicationDidReceiveMemoryWarning:application];
+	}
+}
+
 - (void)setBridge:(RCTBridge *)bridge {
     _bridge = bridge;
+    
+    if (!UnityIsInited()) {
+        InitUnity();
+        UIApplication* application = [UIApplication sharedApplication];
+        UnityAppController *controller = GetAppController();
+        UIWindow* mainWindow = application.keyWindow;
+        [controller application:application didFinishLaunchingWithOptions:bridge.launchOptions];
+        [mainWindow makeKeyAndVisible];
+        [RNUnityViewManager listenAppState];
+    }
 }
 
 RCT_EXPORT_METHOD(postMessage:(nonnull NSNumber *)reactTag gameObject:(NSString *)gameObject methodName:(NSString *)methodName message:(NSString *)message)

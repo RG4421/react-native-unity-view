@@ -6,16 +6,17 @@
 //  Copyright © 2018年 xzper. All rights reserved.
 //
 
+
 #import <UIKit/UIKit.h>
 #import <React/UIView+React.h>
 
 #import "UnityAppController.h"
 #import "UnityUtils.h"
 
-@interface RNUnityView : UIView<UnityEventListener>
+@interface RNUnityView : UIView
 
-@property (nonatomic, strong) UIView* uView;
+@property (nonatomic, strong) UnityView* uView;
 
-@property (nonatomic, copy) RCTDirectEventBlock onMessage;
+- (void)setUnityView:(UnityView *)view;
 
 @end

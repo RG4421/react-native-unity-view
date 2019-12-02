@@ -13,26 +13,33 @@
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
+    if (self){
+        self.uView = (UIView*)GetAppController().unityView;
+        [UnityUtils addUnityEventListener:self];
+    }
     return self;
 }
 
 - (void)dealloc
 {
-}
-
-- (void)setUnityView:(UnityView *)view
-{
-    self.uView = view;
-    [self setNeedsLayout];
+    [UnityUtils removeUnityEventListener:self];
 }
 
 - (void)layoutSubviews
 {
     [super layoutSubviews];
-    [(UIView *)self.uView removeFromSuperview];
-    [self insertSubview:(UIView *)self.uView atIndex:0];
-    ((UIView *)self.uView).frame = self.bounds;
-    [(UIView *)self.uView setNeedsLayout];
+    [self.uView removeFromSuperview];
+    self.uView.frame = self.bounds;
+    [self insertSubview:self.uView atIndex:0];
+    [self.uView setNeedsLayout];
+}
+
+- (void)onMessage:(NSString *)message {
+    if (_onMessage) {
+        _onMessage(@{
+            @"message": message,
+        });
+    }
 }
 
 @end
