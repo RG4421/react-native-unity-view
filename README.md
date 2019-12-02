@@ -1,6 +1,6 @@
 # react-native-unity-view
 
-Integrate unity3d within a React Native app. Add a react native component to show unity. Works on both iOS and Android.
+Integrate unity3d within a React Native app. Add a react native component to show unity. Works on both iOS and Android. Supports React Native 0.60.0 Auto-Linking for Android & iOS
 
 ## Example
 
