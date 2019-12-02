@@ -20,8 +20,26 @@ Make sure you run the Demo properly before opening the Issue.
 
 ```
 npm install react-native-unity-view --save
+```
 
-react-native link react-native-unity-view
+### Modify Pod file and add script
+```Cocoapod
+ post_install do |installer|
+   installer.pods_project.targets.each do |target|
+     if target.name == 'RNUnityView'
+       target.build_configurations.each do |config|
+         config.build_settings['HEADER_SEARCH_PATHS'] ||= "$(inherited)"\
+                                                          " $(PODS_ROOT)/../../node_modules/React/**"\
+                                                          " $(PODS_ROOT)/../../node_modules/react-native/React/**"\
+                                                          " $(PODS_ROOT)/../UnityExport/Classes"\
+                                                          " $(PODS_ROOT)/../UnityExport/Classes/Unity"\
+                                                          " $(PODS_ROOT)/../UnityExport/Libraries"\
+                                                          " $(PODS_ROOT)/../UnityExport/Libraries/libil2cpp/include"\
+                                                          " $(PODS_ROOT)/../UnityExport/Libraries/bdwgc/include"
+       end
+     end
+   end
+ end
 ```
 
 ### Add Unity Project
