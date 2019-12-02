@@ -7,11 +7,9 @@
 extern "C" {
 #endif
     
-void InitArgs(int argc, char* argv[]);
-    
 bool UnityIsInited(void);
 
-void InitUnity();
+void InitUnity(void);
 
 void UnityPostMessage(NSString* gameObject, NSString* methodName, NSString* message);
 

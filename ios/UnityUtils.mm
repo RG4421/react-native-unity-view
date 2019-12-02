@@ -12,16 +12,7 @@ static const int constsection = 0;
 
 bool unity_inited = false;
 
-int g_argc;
-char** g_argv;
-
 void UnityInitTrampoline();
-
-extern "C" void InitArgs(int argc, char* argv[])
-{
-    g_argc = argc;
-    g_argv = argv;
-}
 
 extern "C" bool UnityIsInited()
 {
@@ -34,13 +25,25 @@ extern "C" void InitUnity()
         return;
     }
     unity_inited = true;
-
-    UnityInitStartupTime();
     
     @autoreleasepool
     {
+        NSProcessInfo *processInfo = [NSProcessInfo processInfo];
+        int count= (int)[processInfo.arguments count];
+        char** argv = new char*[count];
+        for(int i=0; i<count; i++) {
+            const char* arg = [processInfo.arguments[i] UTF8String];
+            argv[i] = new char[strlen(arg)];
+            strcpy(argv[i], arg);
+        }
+        
         UnityInitTrampoline();
-        UnityInitRuntime(g_argc, g_argv);
+        UnityInitRuntime(count, argv);
+        
+        for(int i=0; i<count; i++){
+            delete[] argv[i];
+        }
+        delete[] argv;
         
         RegisterMonoModules();
         NSLog(@"-> registered mono modules %p\n", &constsection);
